@@ -5,27 +5,29 @@
   let authCode = $state("");
   let token = $state("");
   let scannedCode = $state("");
-  let secondsOnPage = $state(0);
+  let baghdadTime = $state("");
 
-  // Start timer when component mounts
   onMount(() => {
-    const interval = setInterval(() => {
-      secondsOnPage++;
-    }, 1000);
+    const updateBaghdadTime = () => {
+      const now = new Date();
+      const baghdadTz = new Intl.DateTimeFormat('en-US', {
+        timeZone: 'Asia/Baghdad',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false
+      }).format(now);
+      baghdadTime = baghdadTz;
+    };
+    
+    updateBaghdadTime();
+    const interval = setInterval(updateBaghdadTime, 1000);
 
     return () => clearInterval(interval);
   });
 
-  // Format seconds into HH:MM:SS
-  function formatTime(seconds) {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-  }
-
   function auth() {
-    console.log("Auth button clicked"); // Debug log
+    console.log("Auth button clicked"); 
 
     if (typeof my === "undefined") {
       alert(
@@ -128,8 +130,7 @@
   }
 
   function scan() {
-    console.log("Scan button clicked"); // Debug log
-
+    console.log("Scan button clicked"); 
     if (typeof my === "undefined") {
       alert(
         "Error: Hylid bridge (my) is not loaded. Make sure you're running this in a mini app environment.",
@@ -141,7 +142,7 @@
       type: "qr",
       success: (res) => {
         console.log("QR code scanned:", res.code);
-        scannedCode = res.code; // Save the scanned code
+        scannedCode = res.code; 
         my.alert({
           title: "Scanned Code",
           content: res.code,
@@ -159,15 +160,11 @@
 </script>
 
 <div class="header">
-  <div class="info-item">
-    <span class="label">Scanned Code:</span>
-    <span class="value {scannedCode ? '' : 'placeholder'}"
-      >{scannedCode || "Scan a QR code to see it here"}</span
-    >
-  </div>
-  <div class="info-item">
-    <span class="label">Time on Page:</span>
-    <span class="value">{formatTime(secondsOnPage)}</span>
+  <div class="header-content">
+    <div class="time-display">
+      <span class="time-label">Iraq Time</span>
+      <span class="time-value">{baghdadTime || "--:--:--"}</span>
+    </div>
   </div>
 </div>
 
@@ -180,113 +177,76 @@
 </main>
 
 <style>
+  :global(:root){
+    --bg-1: #eae0cf;
+    --bg-2: #eae0cf;
+    --card: rgba(100,116,139,0.05);
+    --muted: #64748b;
+    --accent: #3b82f6;
+    --accent-2: #8b5cf6;
+    --success: #10b981;
+    --radius: 12px;
+  }
+
   :global(body) {
     margin: 0;
     padding: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
       Ubuntu, Cantarell, sans-serif;
+    background: #eae0cf;
+    color: #1e293b;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
   }
 
   .header {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    background-color: #1a1a1a;
-    padding: 1rem 2rem;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg,rgba(218,197,160,0.5),rgba(218,197,160,0.4));
+    padding: 12px 24px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-  }
-
-  .info-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
-  .label {
-    font-size: 0.75rem;
-    color: #888;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .value {
-    font-size: 1rem;
-    color: #fff;
-    font-weight: 600;
-    font-family: "Courier New", monospace;
-  }
-
-  .value.placeholder {
-    color: #666;
-    font-style: italic;
-    font-weight: 400;
-  }
-
-  main {
-    min-height: 100vh;
-    background-color: #000000;
-    display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    border-radius: 16px;
+    backdrop-filter: blur(8px) saturate(140%);
+    border: 1px solid rgba(218,197,160,0.6);
+    box-shadow: 0 4px 12px rgba(15,23,42,0.08);
+    z-index: 1000;
+    max-width: 520px;
+    width: 90%;
   }
 
-  .button-container {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
+  .header-content { display:flex;gap:28px;align-items:center }
 
-  .btn {
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 0.5rem;
-    font-size: 1.125rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow:
-      0 10px 15px -3px rgba(0, 0, 0, 0.1),
-      0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  }
+  .time-display, .scanned-display { display:flex;flex-direction:column;gap:4px;align-items:center }
 
-  .btn:hover {
-    transform: translateY(-2px);
-    box-shadow:
-      0 20px 25px -5px rgba(0, 0, 0, 0.1),
-      0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
+  .time-label { font-size:0.7rem;color:#64748b;text-transform:uppercase;letter-spacing:0.08em;font-weight:600 }
 
-  .btn:active {
-    transform: translateY(0);
-  }
+  .time-value { font-size:1.1rem;color:#3b82f6;font-weight:800;font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;letter-spacing:0.02em }
 
-  .btn-auth {
-    background-color: #3b82f6;
-  }
+  .code-value { font-size:0.9rem;color:#1e40af;font-weight:600;font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap }
 
-  .btn-auth:hover {
-    background-color: #2563eb;
-  }
+  .code-value.placeholder { color:#94a3b8;font-weight:400;font-style:italic }
 
-  .btn-scan {
-    background-color: #10b981;
-  }
+  main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 20px 40px}
 
-  .btn-scan:hover {
-    background-color: #059669;
-  }
+  .button-container{display:flex;flex-direction:column;gap:14px;max-width:360px;width:100%}
 
-  .btn-pay {
-    background-color: #8b5cf6;
-  }
+  .btn{color:white;padding:12px 18px;border-radius:12px;font-size:1.05rem;font-weight:700;border:none;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease;box-shadow:0 4px 12px rgba(15,23,42,0.15)}
+  .btn:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(15,23,42,0.2)}
 
-  .btn-pay:hover {
-    background-color: #7c3aed;
+  .btn-auth{background:linear-gradient(90deg,#3b82f6,#2563eb)}
+  .btn-scan{background:linear-gradient(90deg,#10b981,#059669)}
+  .btn-pay{background:linear-gradient(90deg,#8b5cf6,#7c3aed)}
+
+  .btn-auth:hover{filter:brightness(0.95)}
+  .btn-scan:hover{filter:brightness(0.95)}
+  .btn-pay:hover{filter:brightness(0.95)}
+
+  @media (max-width:520px){
+    .button-container{max-width:100%;gap:10px}
+    .header{left:10px;right:10px;padding:10px}
   }
 </style>
