@@ -197,6 +197,7 @@
     color: #1e293b;
     -webkit-font-smoothing:antialiased;
     -moz-osx-font-smoothing:grayscale;
+    -webkit-text-size-adjust: 100%;
   }
 
   .header {
@@ -230,12 +231,13 @@
 
   .code-value.placeholder { color:#94a3b8;font-weight:400;font-style:italic }
 
-  main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:120px 20px 40px}
+  main{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 16px 30px}
 
-  .button-container{display:flex;flex-direction:column;gap:14px;max-width:360px;width:100%}
+  .button-container{display:flex;flex-direction:column;gap:14px;max-width:360px;width:100%;min-width:280px}
 
-  .btn{color:white;padding:12px 18px;border-radius:12px;font-size:1.05rem;font-weight:700;border:none;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease;box-shadow:0 4px 12px rgba(15,23,42,0.15)}
+  .btn{color:white;padding:12px 18px;border-radius:12px;font-size:1.05rem;font-weight:700;border:none;cursor:pointer;transition:transform .16s ease,box-shadow .16s ease;box-shadow:0 4px 12px rgba(15,23,42,0.15);width:100%}
   .btn:hover{transform:translateY(-3px);box-shadow:0 12px 24px rgba(15,23,42,0.2)}
+  .btn:active{transform:translateY(0)}
 
   .btn-auth{background:linear-gradient(90deg,#3b82f6,#2563eb)}
   .btn-scan{background:linear-gradient(90deg,#10b981,#059669)}
@@ -245,8 +247,53 @@
   .btn-scan:hover{filter:brightness(0.95)}
   .btn-pay:hover{filter:brightness(0.95)}
 
-  @media (max-width:520px){
-    .button-container{max-width:100%;gap:10px}
-    .header{left:10px;right:10px;padding:10px}
+  @media (max-width:640px){
+    .header {
+      top: 12px;
+      width: 95%;
+      max-width: calc(100% - 24px);
+      padding: 10px 16px;
+      border-radius: 14px;
+    }
+
+    .time-label { font-size:0.65rem;letter-spacing:0.07em }
+    .time-value { font-size:1rem }
+
+    main{padding:90px 12px 20px}
+
+    .button-container{gap:12px;max-width:100%}
+    .btn{padding:11px 16px;font-size:0.95rem;border-radius:10px}
+  }
+
+  @media (max-width:480px){
+    .header {
+      top: 10px;
+      width: 92%;
+      padding: 8px 14px;
+    }
+
+    .time-label { font-size:0.6rem;letter-spacing:0.06em }
+    .time-value { font-size:0.95rem }
+
+    main{padding:80px 10px 16px;min-height:100vh}
+
+    .button-container{gap:10px}
+    .btn{padding:10px 14px;font-size:0.9rem;border-radius:10px}
+  }
+
+  @media (max-width:375px){
+    .header {
+      top: 8px;
+      width: 90%;
+      padding: 8px 12px;
+    }
+
+    .time-label { font-size:0.58rem;letter-spacing:0.05em }
+    .time-value { font-size:0.9rem }
+
+    main{padding:75px 8px 12px}
+
+    .button-container{gap:8px}
+    .btn{padding:9px 12px;font-size:0.85rem;border-radius:9px}
   }
 </style>
