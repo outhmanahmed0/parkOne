@@ -1,166 +1,3 @@
-<!-- <script>
-  import { onMount } from "svelte";
-  import "https://cdn.marmot-cloud.com/npm/hylid-bridge/2.10.0/index.js";
-
-  let authCode = $state("");
-  let token = $state("");
-  let scannedCode = $state("");
-  let baghdadTime = $state("");
-
-  onMount(() => {
-    const updateBaghdadTime = () => {
-      const now = new Date();
-      const baghdadTz = new Intl.DateTimeFormat('en-US', {
-        timeZone: 'Asia/Baghdad',
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit',
-        hour12: false
-      }).format(now);
-      baghdadTime = baghdadTz;
-    };
-    
-    updateBaghdadTime();
-    const interval = setInterval(updateBaghdadTime, 1000);
-
-    return () => clearInterval(interval);
-  });
-
-  function auth() {
-    console.log("Auth button clicked"); 
-
-    if (typeof my === "undefined") {
-      alert(
-        "Error: Hylid bridge (my) is not loaded. Make sure you're running this in a mini app environment.",
-      );
-      return;
-    }
-  
-
-
-    my.getAuthCode({
-      scopes: ["auth_base", "USER_ID"],
-      success: (res) => {
-        authCode = res.authCode;
-        console.log("Auth code received:", authCode);
-
-        fetch("https://its.mouamle.space/api/auth-with-superQi", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            token: authCode,
-          }),
-        })
-          .then((res) => res.json())
-          .then((data) => {
-            token = data.token;
-            console.log("Token received:", token);
-            my.alert({
-              content: "Login successful",
-            });
-          })
-          .catch((err) => {
-            console.error("Auth error:", err);
-            let errorDetails = "";
-            if (err && typeof err === "object") {
-              errorDetails = JSON.stringify(err, null, 2);
-            } else {
-              errorDetails = String(err);
-            }
-            my.alert({
-              content: "Error: " + errorDetails,
-            });
-          });
-      },
-      fail: (res) => {
-        console.error("Auth failed:", res.authErrorScopes);
-        my.alert({
-          content:
-            "Authentication failed: " + JSON.stringify(res.authErrorScopes),
-        });
-      },
-    });
-  }
-
-  function pay() {
-    if (!token) {
-      my.alert({
-        content: "Please authenticate first",
-      });
-      return;
-    }
-
-    fetch("https://its.mouamle.space/api/payment", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        my.tradePay({
-          paymentUrl: data.url,
-          success: (res) => {
-            my.alert({
-              content: "Payment successful",
-            });
-          },
-        });
-      })
-      .catch((err) => {
-        console.error("Payment error:", err);
-        my.alert({
-          content: "Payment failed: " + String(err),
-        });
-      });
-  }
-
-  function copyAuthCode() {
-    if (!authCode) {
-      my.alert({
-        content: "No auth code to copy",
-      });
-      return;
-    }
-    navigator.clipboard.writeText(authCode);
-    my.alert({
-      content: "Auth code copied!",
-    });
-  }
-
-  function scan() {
-    console.log("Scan button clicked"); 
-    if (typeof my === "undefined") {
-      alert(
-        "Error: Hylid bridge (my) is not loaded. Make sure you're running this in a mini app environment.",
-      );
-      return;
-    }
-
-    my.scan({
-      type: "qr",
-      success: (res) => {
-        console.log("QR code scanned:", res.code);
-        scannedCode = res.code; 
-        my.alert({
-          title: "Scanned Code",
-          content: res.code,
-        });
-      },
-      fail: (err) => {
-        console.error("Scan failed:", err);
-        my.alert({
-          title: "Scan Failed",
-          content: "Failed to scan QR code",
-        });
-      },
-    });
-  }
-</script> -->
-
 <script>
   import { onMount } from "svelte";
   import "https://cdn.marmot-cloud.com/npm/hylid-bridge/2.10.0/index.js";
@@ -170,7 +7,6 @@
   let scannedCode = "";
   let baghdadTime = "";
 
-  // ===== Time =====
   onMount(() => {
     const updateTime = () => {
       baghdadTime = new Intl.DateTimeFormat("en-US", {
@@ -187,7 +23,6 @@
     return () => clearInterval(i);
   });
 
-  // ===== Helper =====
   function ensureMiniApp() {
     if (typeof my === "undefined") {
       alert("Mini App environment not detected");
@@ -195,8 +30,7 @@
     }
     return true;
   }
-
-  // ===== Auth =====
+  
   function auth() {
     if (!ensureMiniApp()) return;
 
@@ -204,14 +38,7 @@
       scopes: ["auth_base", "USER_ID"],
 
       success: async (res) => {
-        /*
-          res example:
-          {
-            authCode: "...",
-            userId: "123456" // إذا كان USER_ID مفعّل
-          }
-        */
-
+        
         authCode = res.authCode;
 
         try {
@@ -222,7 +49,7 @@
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 token: res.authCode,
-                userId: res.userId // optional
+                userId: res.userId
               })
             }
           );
@@ -246,7 +73,6 @@
     });
   }
 
-  // ===== Payment =====
   async function pay() {
     if (!ensureMiniApp()) return;
     if (!token) {
@@ -277,7 +103,6 @@
     }
   }
 
-  // ===== Scan =====
   function scan() {
     if (!ensureMiniApp()) return;
 
@@ -293,28 +118,6 @@
     });
   }
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 <div class="header">
