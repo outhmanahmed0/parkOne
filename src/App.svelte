@@ -1,4 +1,4 @@
-<script>
+<!-- <script>
   import { onMount } from "svelte";
   import "https://cdn.marmot-cloud.com/npm/hylid-bridge/2.10.0/index.js";
 
@@ -35,6 +35,8 @@
       );
       return;
     }
+  
+
 
     my.getAuthCode({
       scopes: ["auth_base", "USER_ID"],
@@ -157,7 +159,163 @@
       },
     });
   }
+</script> -->
+
+<script>
+  import { onMount } from "svelte";
+  import "https://cdn.marmot-cloud.com/npm/hylid-bridge/2.10.0/index.js";
+
+  let authCode = "";
+  let token = "";
+  let scannedCode = "";
+  let baghdadTime = "";
+
+  // ===== Time =====
+  onMount(() => {
+    const updateTime = () => {
+      baghdadTime = new Intl.DateTimeFormat("en-US", {
+        timeZone: "Asia/Baghdad",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false
+      }).format(new Date());
+    };
+
+    updateTime();
+    const i = setInterval(updateTime, 1000);
+    return () => clearInterval(i);
+  });
+
+  // ===== Helper =====
+  function ensureMiniApp() {
+    if (typeof my === "undefined") {
+      alert("Mini App environment not detected");
+      return false;
+    }
+    return true;
+  }
+
+  // ===== Auth =====
+  function auth() {
+    if (!ensureMiniApp()) return;
+
+    my.getAuthCode({
+      scopes: ["auth_base", "USER_ID"],
+
+      success: async (res) => {
+        /*
+          res example:
+          {
+            authCode: "...",
+            userId: "123456" // إذا كان USER_ID مفعّل
+          }
+        */
+
+        authCode = res.authCode;
+
+        try {
+          const response = await fetch(
+            "https://its.mouamle.space/api/auth-with-superQi",
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                token: res.authCode,
+                userId: res.userId // optional
+              })
+            }
+          );
+
+          const data = await response.json();
+          token = data.token;
+
+          my.alert({ content: "Login successful" });
+        } catch (err) {
+          console.error("Backend auth error:", err);
+          my.alert({ content: "Backend authentication failed" });
+        }
+      },
+
+      fail: (res) => {
+        console.error("Auth failed:", res);
+        my.alert({
+          content: JSON.stringify(res, null, 2)
+        });
+      }
+    });
+  }
+
+  // ===== Payment =====
+  async function pay() {
+    if (!ensureMiniApp()) return;
+    if (!token) {
+      my.alert({ content: "Please authenticate first" });
+      return;
+    }
+
+    try {
+      const res = await fetch("https://its.mouamle.space/api/payment", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token
+        }
+      });
+
+      const data = await res.json();
+
+      my.tradePay({
+        paymentUrl: data.url,
+        success: () => {
+          my.alert({ content: "Payment successful" });
+        }
+      });
+    } catch (err) {
+      console.error("Payment error:", err);
+      my.alert({ content: "Payment failed" });
+    }
+  }
+
+  // ===== Scan =====
+  function scan() {
+    if (!ensureMiniApp()) return;
+
+    my.scan({
+      type: "qr",
+      success: ({ code }) => {
+        scannedCode = code;
+        my.alert({ title: "Scanned Code", content: code });
+      },
+      fail: () => {
+        my.alert({ title: "Scan Failed", content: "Unable to scan QR" });
+      }
+    });
+  }
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 <div class="header">
   <div class="header-content">
